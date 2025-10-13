@@ -5,7 +5,7 @@ Secure code execution backend service with Docker isolation for multiple program
 ## Features
 
 - 🔒 Secure Docker isolation execution
-- 🌍 Support for 20+ programming languages
+- 🌍 Support for 11 programming languages
 - ⚡ Fast execution with resource limits
 - 📊 Complete logging
 - 🔄 REST API interface
