@@ -15,6 +15,20 @@ services:
         sync: false
       - key: SUPABASE_ANON_KEY
         sync: false
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: CONTAINER_TIMEOUT_MS
+        value: 30000
+      - key: CONTAINER_MEMORY_LIMIT
+        value: 128m
+      - key: CONTAINER_CPU_LIMIT
+        value: 0.5
+      - key: MAX_EXECUTION_TIME_MS
+        value: 10000
+      - key: LOG_LEVEL
+        value: info
     healthCheck:
       path: /health
       initialDelaySeconds: 10

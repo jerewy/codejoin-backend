@@ -17,11 +17,13 @@ RUN npm ci --only=production
 
 # Copy application code
 COPY src/ ./src/
-COPY scripts/ ./scripts/
+
+# Create scripts directory (optional - only if needed for the application)
+RUN mkdir -p ./scripts
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodeuser -u 1001
+  adduser -S nodeuser -u 1001
 
 # Change ownership of the app directory to nodeuser
 RUN chown -R nodeuser:nodejs /usr/src/app
