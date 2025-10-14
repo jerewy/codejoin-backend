@@ -1,0 +1,77 @@
+name: Sync Documentation
+
+on:
+  push:
+    paths:
+      - "FRONTEND_*.md"
+      - "README_FOR_FRONTEND_TEAMS.md"
+      - "MULTI_REPOSITORY_INTEGRATION.md"
+      - "DOCS_DEPLOYMENT_GUIDE.md"
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  sync-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Backend Repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "Documentation Bot"
+          git config --global user.email "docs@codejoin.com"
+
+      - name: Checkout Docs Repository
+        uses: actions/checkout@v3
+        with:
+          repository: your-org/codejoin-docs
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
+          path: docs-repo
+
+      - name: Sync Documentation Files
+        run: |
+          # List of files to sync
+          FILES_TO_SYNC=(
+            "FRONTEND_API_DOCUMENTATION.md:api/frontend/"
+            "FRONTEND_INTEGRATION_GUIDE.md:api/frontend/"
+            "API_QUICK_REFERENCE.md:api/frontend/"
+            "FRONTEND_DOCS_SETUP_GUIDE.md:api/frontend/"
+            "README_FOR_FRONTEND_TEAMS.md:/"
+            "MULTI_REPOSITORY_INTEGRATION.md:api/frontend/"
+            "DOCS_DEPLOYMENT_GUIDE.md:/"
+          )
+
+          # Sync each file
+          for file_mapping in "${FILES_TO_SYNC[@]}"; do
+            IFS=':' read -r source_file target_dir <<< "$file_mapping"
+            
+            if [ -f "$source_file" ]; then
+              echo "📄 Copying $source_file to $target_dir"
+              mkdir -p "docs-repo/$target_dir"
+              cp "$source_file" "docs-repo/$target_dir$source_file"
+            fi
+          done
+
+      - name: Commit and Push Changes
+        run: |
+          cd docs-repo
+
+          if ! git diff --quiet; then
+            git add .
+            git commit -m "📚 Auto-sync documentation from backend repository
+            
+            - Synced from commit: ${{ github.sha }}
+            - Triggered by: ${{ github.actor }}
+            - Timestamp: $(date -u)"
+            
+            git push origin main
+            echo "✅ Documentation synced successfully!"
+          else
+            echo "ℹ️  No changes to commit"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
