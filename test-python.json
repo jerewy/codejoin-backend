@@ -1,0 +1,5 @@
+{
+  "language": "python",
+  "code": "print('Hello from Python!')\nprint('Code execution is working!')",
+  "timeout": 10
+}

@@ -29,6 +29,8 @@ services:
         value: 10000
       - key: LOG_LEVEL
         value: info
+      - key: REDIS_URL
+        sync: false
     healthCheck:
       path: /health
       initialDelaySeconds: 10

@@ -1,0 +1,5 @@
+{
+  "language": "python",
+  "code": "print('Hello World!')",
+  "timeout": 10
+}

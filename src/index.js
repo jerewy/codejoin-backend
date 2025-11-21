@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const winston = require('winston');
 const path = require('path');
+const CodeExecutionService = require('./codeExecution');
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +28,9 @@ const logger = winston.createLogger({
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Initialize Code Execution Service
+const codeExecutionService = new CodeExecutionService();
 
 // Security middleware
 app.use(helmet());
@@ -69,18 +73,33 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Code execution endpoint (placeholder)
-app.post('/api/execute', (req, res) => {
-  res.status(501).json({
-    error: 'Code execution endpoint not yet implemented'
-  });
+// Code execution endpoint
+app.post('/api/execute', async (req, res) => {
+  try {
+    const result = await codeExecutionService.executeCode(req.body);
+    res.status(202).json(result);
+  } catch (error) {
+    logger.error('Code execution error:', error);
+    res.status(400).json({
+      error: 'Code execution failed',
+      message: error.message
+    });
+  }
 });
 
-// Status endpoint (placeholder)
-app.get('/api/status/:id', (req, res) => {
-  res.status(501).json({
-    error: 'Status endpoint not yet implemented'
-  });
+// Status endpoint
+app.get('/api/status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const execution = await codeExecutionService.getExecutionStatus(id);
+    res.json(execution);
+  } catch (error) {
+    logger.error('Status check error:', error);
+    res.status(404).json({
+      error: 'Execution not found',
+      message: error.message
+    });
+  }
 });
 
 // Error handling middleware
@@ -101,8 +120,15 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+app.listen(PORT, async () => {
+  try {
+    await codeExecutionService.initialize();
+    logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    logger.info('Code execution service initialized successfully');
+  } catch (error) {
+    logger.error('Failed to initialize code execution service:', error);
+    process.exit(1);
+  }
 });
 
 module.exports = app;

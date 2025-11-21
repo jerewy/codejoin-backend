@@ -1,0 +1,5 @@
+{
+  "language": "javascript",
+  "code": "console.log('Hello World!');\nconsole.log('Code execution test successful!');",
+  "timeout": 10
+}
